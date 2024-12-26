@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/imhasandl/grpc-go-project/services/orders/service"
 )
@@ -16,13 +17,19 @@ func NewHttpServer(addr string) *httpServer {
 }
 
 func (srv *httpServer) Run() {
-	router := http.NewServeMux()
+	mux := http.NewServeMux()
 
 	orderService := service.NewOrderService()
 
+	// err := http.ListenAndServe(srv.addr, router)
+
+	server := &http.Server{
+		Addr:              srv.addr,
+		Handler:           mux,
+		ReadHeaderTimeout: 30 * time.Second,
+	}
+
 	log.Println("Starting server on port: ", srv.addr)
 
-	err := http.ListenAndServe(srv.addr, router)
-
-	log.Fatal(err)
+	log.Fatal(server.ListenAndServe())
 }
